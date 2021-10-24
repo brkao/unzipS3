@@ -22,13 +22,14 @@ def lambda_handler(event, context):
     latest_event = sorted_events[-1] if sorted_events else {}
     info = latest_event.get('s3', {})
     file_key = info.get('object', {}).get('key')
-    if !file_key.endswith('.gz'):
-        return
-
     bucket_name = info.get('bucket', {}).get('name')
     uncompressed_key = str(Path(file_key).with_suffix(''))
 
     print("Event for Bucket [%s] File [%s] Uncompressed [%s]" % (bucket_name, file_key, uncompressed_key))
+    if not file_key.endswith('.gz'):
+        print("Not a .gz file, done")
+        return
+
     try:
         zip_obj = s3_resource.Object(bucket_name=bucket_name, key=file_key)
         fileobj=gzip.GzipFile(
